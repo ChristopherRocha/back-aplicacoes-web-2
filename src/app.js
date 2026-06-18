@@ -3,14 +3,19 @@ const cors = require('cors');
 const path = require('path');
 const app = express();
 
-const allowedOrigins = (process.env.CORS_ORIGIN || '')
+const corsOrigins = (process.env.CORS_ORIGIN || '')
   .split(',')
   .map(origin => origin.trim())
   .filter(Boolean);
+const allowAllOrigins = corsOrigins.length === 0
+  || corsOrigins.includes('*')
+  || corsOrigins.some(origin => origin.toLowerCase() === 'all');
+const allowedOrigins = corsOrigins
+  .filter(origin => origin !== '*' && origin.toLowerCase() !== 'all');
 
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+    if (!origin || allowAllOrigins || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 

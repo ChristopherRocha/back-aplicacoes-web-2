@@ -18,7 +18,7 @@ DB_SSL=true
 
 JWT_SECRET=troque-por-uma-chave-grande-e-aleatoria
 JWT_EXPIRES_IN_SECONDS=86400
-CORS_ORIGIN=http://localhost:5173
+CORS_ORIGIN=*
 ```
 
 ## Render
@@ -32,12 +32,14 @@ NODE_ENV=production
 DATABASE_URL=postgres://postgres.PROJECT_REF:SUA_PASSWORD@aws-REGION.pooler.supabase.com:5432/postgres
 DB_SSL=true
 JWT_SECRET=uma-chave-grande-e-aleatoria
-CORS_ORIGIN=https://seu-front-end.com
+CORS_ORIGIN=*
 ```
 
 O backend da Render pode nao conseguir acessar o endpoint direto `db.PROJECT_REF.supabase.co:5432`
 quando ele resolve para IPv6. Nesse caso, copie do dashboard do Supabase a connection string
 `Session pooler`, que usa o host `aws-REGION.pooler.supabase.com` e funciona em redes IPv4.
+Neste projeto, o host do pooler e `aws-0-eu-west-3.pooler.supabase.com`, porta `5432`,
+database `postgres` e user `postgres.xwnkbpluxftynawtajay`.
 
 O projeto tambem aceita as variaveis separadas `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` e
 `DB_PASSWORD`, mas `DATABASE_URL` tem prioridade e e mais simples para deploy.
@@ -117,5 +119,4 @@ axios.post(`${import.meta.env.VITE_API_URL}/filmes`, data, {
 - Use `DATABASE_URL` do Supabase `Session pooler`
 - Configure `NODE_ENV=production`
 - Configure `JWT_SECRET`
-- Configure `CORS_ORIGIN` com a URL real do frontend
-- Nao configure `CORS_ORIGIN=http://localhost:5173` em producao, exceto para testes locais
+- Configure `CORS_ORIGIN=*` para permitir todos os dominios
