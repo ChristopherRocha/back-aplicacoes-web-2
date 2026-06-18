@@ -17,4 +17,5 @@ sequelize.authenticate()
   .catch(err => {
     console.error('Falha ao conectar no PostgreSQL. Verifique DATABASE_URL ou credenciais DB_*.');
     console.error(err);
+    process.exit(1);
   });

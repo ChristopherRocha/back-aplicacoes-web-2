@@ -2,7 +2,8 @@
 
 ## Variaveis da API
 
-Crie/atualize o `.env` na raiz do projeto, junto ao `package.json`.
+Para desenvolvimento local, crie/atualize o `.env` na raiz do projeto, junto ao `package.json`.
+Nao envie o `.env` para o Git. Use `.env.example` como modelo.
 
 ```env
 PORT=3000
@@ -20,14 +21,30 @@ JWT_EXPIRES_IN_SECONDS=86400
 CORS_ORIGIN=http://localhost:5173
 ```
 
-Tambem pode usar uma connection string:
+## Render
 
-```env
-DATABASE_URL=postgresql://postgres:SUA_PASSWORD_URL_ENCODED@db.xwnkbpluxftynawtajay.supabase.co:5432/postgres
+No Render, configure as variaveis em `Environment`. Nao crie `.env` no repo.
+
+Use preferencialmente a connection string do Supabase Pooler:
+
+```txt
+NODE_ENV=production
+DATABASE_URL=postgres://postgres.PROJECT_REF:SUA_PASSWORD@aws-REGION.pooler.supabase.com:5432/postgres
 DB_SSL=true
+JWT_SECRET=uma-chave-grande-e-aleatoria
+CORS_ORIGIN=https://seu-front-end.com
 ```
 
+O backend da Render pode nao conseguir acessar o endpoint direto `db.PROJECT_REF.supabase.co:5432`
+quando ele resolve para IPv6. Nesse caso, copie do dashboard do Supabase a connection string
+`Session pooler`, que usa o host `aws-REGION.pooler.supabase.com` e funciona em redes IPv4.
+
+O projeto tambem aceita as variaveis separadas `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` e
+`DB_PASSWORD`, mas `DATABASE_URL` tem prioridade e e mais simples para deploy.
+
 Se a password tiver caracteres como `&`, `%` ou `@`, eles precisam estar codificados na `DATABASE_URL`.
+Ao copiar a string do dashboard do Supabase, normalmente ela ja vem no formato certo ou com o campo
+`[YOUR-PASSWORD]` para substituir.
 
 ## Endpoints de auth
 
@@ -93,6 +110,12 @@ axios.post(`${import.meta.env.VITE_API_URL}/filmes`, data, {
 });
 ```
 
-## Supabase no deploy
+## Checklist de deploy
 
-O endpoint direto `db.xwnkbpluxftynawtajay.supabase.co:5432` pode exigir rede IPv6 no servidor. Se o deploy nao conseguir conectar, use a connection string do Supabase em modo pooler session, disponivel no dashboard em `Connect`.
+- Build command no Render: `npm install`
+- Start command no Render: `npm start` ou `node index.js`
+- Use `DATABASE_URL` do Supabase `Session pooler`
+- Configure `NODE_ENV=production`
+- Configure `JWT_SECRET`
+- Configure `CORS_ORIGIN` com a URL real do frontend
+- Nao configure `CORS_ORIGIN=http://localhost:5173` em producao, exceto para testes locais
