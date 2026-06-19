@@ -40,7 +40,11 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-	res.sendFile(path.join(__dirname, '../public/index.html'));
+	res.json({
+		status: 'ok',
+		name: 'back-aplicacoes-web-2',
+		endpoints: ['/health', '/auth', '/filmes', '/generos'],
+	});
 });
 
 module.exports = app;
