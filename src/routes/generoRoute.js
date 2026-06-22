@@ -5,10 +5,11 @@ const generoController = require('../controllers/generoController');
 const { authenticate } = require('../middleware/authMiddleware');
 
 // CRUD
-router.post('/', authenticate, generoController.create);
+router.use(authenticate);
+router.post('/', generoController.create);
 router.get('/', generoController.getAll);
 router.get('/:id', generoController.getById);
-router.put('/:id', authenticate, generoController.update);
-router.delete('/:id', authenticate, generoController.remove);
+router.put('/:id', generoController.update);
+router.delete('/:id', generoController.remove);
 
 module.exports = router;

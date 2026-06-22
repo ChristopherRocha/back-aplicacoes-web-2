@@ -37,6 +37,11 @@ const Filme = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
   {
     tableName: 'filmes',

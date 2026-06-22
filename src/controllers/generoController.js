@@ -3,7 +3,12 @@ const Genero = require('../models/Genero');
 // CREATE
 exports.create = async (req, res) => {
   try {
-    const genero = await Genero.create(req.body);
+    const { id, userId, ...data } = req.body;
+    const genero = await Genero.create({
+      ...data,
+      userId: req.user.id,
+    });
+
     res.status(201).json(genero);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -13,7 +18,10 @@ exports.create = async (req, res) => {
 // READ ALL
 exports.getAll = async (req, res) => {
   try {
-    const generos = await Genero.findAll();
+    const generos = await Genero.findAll({
+      where: { userId: req.user.id },
+    });
+
     res.json(generos);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -23,10 +31,15 @@ exports.getAll = async (req, res) => {
 // READ ONE
 exports.getById = async (req, res) => {
   try {
-    const genero = await Genero.findByPk(req.params.id);
+    const genero = await Genero.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
+    });
 
     if (!genero) {
-      return res.status(404).json({ error: 'Genero não encontrado' });
+      return res.status(404).json({ error: 'Genero nao encontrado' });
     }
 
     res.json(genero);
@@ -38,13 +51,19 @@ exports.getById = async (req, res) => {
 // UPDATE
 exports.update = async (req, res) => {
   try {
-    const genero = await Genero.findByPk(req.params.id);
+    const genero = await Genero.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
+    });
 
     if (!genero) {
-      return res.status(404).json({ error: 'Genero não encontrado' });
+      return res.status(404).json({ error: 'Genero nao encontrado' });
     }
 
-    await genero.update(req.body);
+    const { id, userId, ...data } = req.body;
+    await genero.update(data);
 
     res.json(genero);
   } catch (err) {
@@ -55,10 +74,15 @@ exports.update = async (req, res) => {
 // DELETE
 exports.remove = async (req, res) => {
   try {
-    const genero = await Genero.findByPk(req.params.id);
+    const genero = await Genero.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
+    });
 
     if (!genero) {
-      return res.status(404).json({ error: 'Genero não encontrado' });
+      return res.status(404).json({ error: 'Genero nao encontrado' });
     }
 
     await genero.destroy();
