@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const Filme = sequelize.define(
-  'Filme',
+const Imagem = sequelize.define(
+  'Imagem',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -10,17 +10,8 @@ const Filme = sequelize.define(
       primaryKey: true,
     },
 
-    titulo: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-
-    descricao: {
-      type: DataTypes.TEXT,
-    },
-
     foto: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
 
     fotoBinaria: {
@@ -30,23 +21,18 @@ const Filme = sequelize.define(
     isUrl: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false,
-    },
-
-    generoId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+      defaultValue: true,
     },
 
     userId: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
   },
   {
-    tableName: 'filmes',
+    tableName: 'imagens',
     timestamps: true,
   }
 );
 
-module.exports = Filme;
+module.exports = Imagem;

@@ -15,6 +15,7 @@ exports.register = async (req, res) => {
     const nome = String(req.body.nome || '').trim();
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
+    const isAdmin = req.body.isAdmin === true || req.body.isAdmin === 'true' || req.body.role === 'admin';
 
     if (!nome || !email || !password) {
       return res.status(400).json({ error: 'Nome, email e password sao obrigatorios.' });
@@ -30,12 +31,11 @@ exports.register = async (req, res) => {
       return res.status(409).json({ error: 'Ja existe um utilizador com este email.' });
     }
 
-    const usersCount = await User.count();
     const user = await User.create({
       nome,
       email,
       passwordHash: hashPassword(password),
-      role: usersCount === 0 ? 'admin' : 'user',
+      role: isAdmin ? 'admin' : 'user',
     });
 
     const token = signToken({ sub: user.id, email: user.email, role: user.role });
