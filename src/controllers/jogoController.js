@@ -365,7 +365,17 @@ exports.updateComentario = async (req, res) => {
 
     await comentario.update({ texto });
 
-    res.json(comentario);
+    const updatedComentario = await Comentario.findByPk(comentario.id, {
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'nome', 'email', 'role'],
+        },
+      ],
+    });
+
+    res.json(updatedComentario);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
