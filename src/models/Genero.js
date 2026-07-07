@@ -13,16 +13,18 @@ const Genero = sequelize.define(
     descricao: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
+      unique: true,
     },
   },
   {
     tableName: 'generos',
     timestamps: false,
+    indexes: [
+      {
+        unique: true,
+        fields: ['descricao'],
+      },
+    ],
   }
 );
 

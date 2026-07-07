@@ -5,9 +5,12 @@ const app = require('./app');
 require('./models/association');
 
 const PORT = process.env.PORT || 3000;
+const syncOptions = process.env.DB_SYNC_FORCE === 'true'
+  ? { force: true }
+  : { alter: true };
 
 sequelize.authenticate()
-  .then(() => sequelize.sync({ alter: true }))
+  .then(() => sequelize.sync(syncOptions))
   .then(() => {
     console.log('Tabelas sincronizadas com sucesso.');
     app.listen(PORT, () => {

@@ -28,11 +28,11 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // routes
 const authRoutes = require('./routes/authRoute');
-const filmeRoutes = require('./routes/filmeRoute');
+const jogoRoutes = require('./routes/jogoRoute');
 const generoRoutes = require('./routes/generoRoute');
 
 app.use('/auth', authRoutes);
-app.use('/filmes', filmeRoutes);
+app.use('/jogos', jogoRoutes);
 app.use('/generos', generoRoutes);
 
 app.get('/health', (req, res) => {
@@ -42,8 +42,8 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
 	res.json({
 		status: 'ok',
-		name: 'back-aplicacoes-web-2',
-		endpoints: ['/health', '/auth', '/filmes', '/generos'],
+		name: 'back-jogos-aplicacoes-web-2',
+		endpoints: ['/health', '/auth', '/jogos', '/generos'],
 	});
 });
 

@@ -1,13 +1,24 @@
-const Genero = require('../models/Genero');
+const { Jogo, Genero } = require('../models/association');
 
-// CREATE
+function normalizeDescricao(value) {
+  return String(value || '').trim();
+}
+
 exports.create = async (req, res) => {
   try {
-    const { id, userId, ...data } = req.body;
-    const genero = await Genero.create({
-      ...data,
-      userId: req.user.id,
-    });
+    const descricao = normalizeDescricao(req.body.descricao);
+
+    if (!descricao) {
+      return res.status(400).json({ error: 'Descricao e obrigatoria.' });
+    }
+
+    const existingGenero = await Genero.findOne({ where: { descricao } });
+
+    if (existingGenero) {
+      return res.status(409).json({ error: 'Ja existe um genero com esta descricao.' });
+    }
+
+    const genero = await Genero.create({ descricao });
 
     res.status(201).json(genero);
   } catch (err) {
@@ -15,11 +26,10 @@ exports.create = async (req, res) => {
   }
 };
 
-// READ ALL
 exports.getAll = async (req, res) => {
   try {
     const generos = await Genero.findAll({
-      where: { userId: req.user.id },
+      order: [['descricao', 'ASC']],
     });
 
     res.json(generos);
@@ -28,18 +38,12 @@ exports.getAll = async (req, res) => {
   }
 };
 
-// READ ONE
 exports.getById = async (req, res) => {
   try {
-    const genero = await Genero.findOne({
-      where: {
-        id: req.params.id,
-        userId: req.user.id,
-      },
-    });
+    const genero = await Genero.findByPk(req.params.id);
 
     if (!genero) {
-      return res.status(404).json({ error: 'Genero nao encontrado' });
+      return res.status(404).json({ error: 'Genero nao encontrado.' });
     }
 
     res.json(genero);
@@ -48,22 +52,26 @@ exports.getById = async (req, res) => {
   }
 };
 
-// UPDATE
 exports.update = async (req, res) => {
   try {
-    const genero = await Genero.findOne({
-      where: {
-        id: req.params.id,
-        userId: req.user.id,
-      },
-    });
+    const genero = await Genero.findByPk(req.params.id);
+    const descricao = normalizeDescricao(req.body.descricao);
 
     if (!genero) {
-      return res.status(404).json({ error: 'Genero nao encontrado' });
+      return res.status(404).json({ error: 'Genero nao encontrado.' });
     }
 
-    const { id, userId, ...data } = req.body;
-    await genero.update(data);
+    if (!descricao) {
+      return res.status(400).json({ error: 'Descricao e obrigatoria.' });
+    }
+
+    const existingGenero = await Genero.findOne({ where: { descricao } });
+
+    if (existingGenero && existingGenero.id !== genero.id) {
+      return res.status(409).json({ error: 'Ja existe um genero com esta descricao.' });
+    }
+
+    await genero.update({ descricao });
 
     res.json(genero);
   } catch (err) {
@@ -71,23 +79,29 @@ exports.update = async (req, res) => {
   }
 };
 
-// DELETE
 exports.remove = async (req, res) => {
   try {
-    const genero = await Genero.findOne({
+    const genero = await Genero.findByPk(req.params.id);
+
+    if (!genero) {
+      return res.status(404).json({ error: 'Genero nao encontrado.' });
+    }
+
+    const jogosCount = await Jogo.count({
       where: {
-        id: req.params.id,
-        userId: req.user.id,
+        generoId: genero.id,
       },
     });
 
-    if (!genero) {
-      return res.status(404).json({ error: 'Genero nao encontrado' });
+    if (jogosCount > 0) {
+      return res.status(409).json({
+        error: 'Nao e possivel apagar um genero que ja possui jogos.',
+      });
     }
 
     await genero.destroy();
 
-    res.json({ message: 'Genero removido com sucesso' });
+    res.json({ message: 'Genero removido com sucesso.' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

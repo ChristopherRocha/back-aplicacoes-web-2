@@ -62,7 +62,8 @@ Body para register:
 {
   "nome": "Admin",
   "email": "admin@email.com",
-  "password": "123456"
+  "password": "123456",
+  "isAdmin": true
 }
 ```
 
@@ -83,15 +84,28 @@ Authorization: Bearer SEU_TOKEN
 
 ## Rotas protegidas
 
-As rotas `GET` continuam publicas. As rotas abaixo exigem token:
+As rotas abaixo exigem token:
 
 ```txt
-POST   /filmes
-PUT    /filmes/:id
-DELETE /filmes/:id
-POST   /generos
-PUT    /generos/:id
-DELETE /generos/:id
+GET    /jogos
+POST   /jogos
+GET    /jogos/:id
+PUT    /jogos/:id
+DELETE /jogos/:id
+
+GET    /jogos/:id/comentarios
+POST   /jogos/:id/comentarios
+PUT    /jogos/:id/comentarios/:comentarioId
+DELETE /jogos/:id/comentarios/:comentarioId
+
+PUT    /jogos/:id/avaliacao
+DELETE /jogos/:id/avaliacao
+
+GET    /generos
+GET    /generos/:id
+POST   /generos      admin
+PUT    /generos/:id  admin
+DELETE /generos/:id  admin
 ```
 
 ## React
@@ -105,7 +119,7 @@ VITE_API_URL=https://sua-api.onrender.com
 Exemplo com Axios:
 
 ```js
-axios.post(`${import.meta.env.VITE_API_URL}/filmes`, data, {
+axios.post(`${import.meta.env.VITE_API_URL}/jogos`, data, {
   headers: {
     Authorization: `Bearer ${token}`,
   },
