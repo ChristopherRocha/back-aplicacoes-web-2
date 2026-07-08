@@ -5,6 +5,23 @@ const app = require('./app');
 require('./models/association');
 
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
+
+function shouldSyncDatabase() {
+  if (process.env.DB_SYNC_FORCE === 'true' || process.env.DB_SYNC_ALTER === 'true') {
+    return true;
+  }
+
+  if (process.env.DB_SYNC === 'true') {
+    return true;
+  }
+
+  if (process.env.DB_SYNC === 'false') {
+    return false;
+  }
+
+  return !isProduction;
+}
 
 function getSyncOptions() {
   if (process.env.DB_SYNC_FORCE === 'true') {
@@ -19,11 +36,22 @@ function getSyncOptions() {
 }
 
 const syncOptions = getSyncOptions();
+const syncDatabase = shouldSyncDatabase();
 
 sequelize.authenticate()
-  .then(() => sequelize.sync(syncOptions))
   .then(() => {
-    console.log('Tabelas sincronizadas com sucesso.');
+    if (!syncDatabase) {
+      console.log('Sincronizacao automatica das tabelas ignorada em producao.');
+      return null;
+    }
+
+    return sequelize.sync(syncOptions);
+  })
+  .then(() => {
+    if (syncDatabase) {
+      console.log('Tabelas sincronizadas com sucesso.');
+    }
+
     app.listen(PORT, () => {
       console.log(`Servidor rodando em http://localhost:${PORT}`);
     });
