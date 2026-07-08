@@ -10,12 +10,26 @@ function userResponse(user) {
   };
 }
 
+function wantsAdmin(body) {
+  const value = body.isAdmin ?? body.admin ?? body.is_admin ?? body.role;
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return ['true', '1', 'admin', 'yes', 'sim'].includes(value.trim().toLowerCase());
+  }
+
+  return value === 1;
+}
+
 exports.register = async (req, res) => {
   try {
     const nome = String(req.body.nome || '').trim();
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
-    const isAdmin = req.body.isAdmin === true || req.body.isAdmin === 'true' || req.body.role === 'admin';
+    const role = wantsAdmin(req.body) ? 'admin' : 'user';
 
     if (!nome || !email || !password) {
       return res.status(400).json({ error: 'Nome, email e password sao obrigatorios.' });
@@ -28,6 +42,18 @@ exports.register = async (req, res) => {
     const existingUser = await User.findOne({ where: { email } });
 
     if (existingUser) {
+      if (role === 'admin' && verifyPassword(password, existingUser.passwordHash)) {
+        await existingUser.update({ role });
+        await existingUser.reload();
+
+        const token = signToken({ sub: existingUser.id, email: existingUser.email, role: existingUser.role });
+
+        return res.json({
+          user: userResponse(existingUser),
+          token,
+        });
+      }
+
       return res.status(409).json({ error: 'Ja existe um utilizador com este email.' });
     }
 
@@ -35,8 +61,13 @@ exports.register = async (req, res) => {
       nome,
       email,
       passwordHash: hashPassword(password),
-      role: isAdmin ? 'admin' : 'user',
+      role,
     });
+
+    if (user.role !== role) {
+      await user.update({ role });
+      await user.reload();
+    }
 
     const token = signToken({ sub: user.id, email: user.email, role: user.role });
 
