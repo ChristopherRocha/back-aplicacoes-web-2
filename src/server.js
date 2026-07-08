@@ -5,9 +5,20 @@ const app = require('./app');
 require('./models/association');
 
 const PORT = process.env.PORT || 3000;
-const syncOptions = process.env.DB_SYNC_FORCE === 'true'
-  ? { force: true }
-  : { alter: true };
+
+function getSyncOptions() {
+  if (process.env.DB_SYNC_FORCE === 'true') {
+    return { force: true };
+  }
+
+  if (process.env.DB_SYNC_ALTER === 'true') {
+    return { alter: true };
+  }
+
+  return {};
+}
+
+const syncOptions = getSyncOptions();
 
 sequelize.authenticate()
   .then(() => sequelize.sync(syncOptions))
@@ -18,7 +29,7 @@ sequelize.authenticate()
     });
   })
   .catch(err => {
-    console.error('Falha ao conectar no PostgreSQL. Verifique DATABASE_URL ou credenciais DB_*.');
+    console.error('Falha ao iniciar servidor. Verifique a conexao PostgreSQL e a sincronizacao das tabelas.');
     console.error(err);
     process.exit(1);
   });
